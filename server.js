@@ -34,6 +34,21 @@ app.post("/create-process", async (req, res) => {
   }
 });
 
+// Endpoint to get all processes
+app.get("/get-all", async (req, res) => {
+  try {
+    const processes = await Process.find();
+    const formattedProcesses = processes.map((process) => ({
+      PID: process.pid,
+      "Creation time": formatDate(process.creationTime),
+      //   logs: process.logs,
+    }));
+    res.json(formattedProcesses);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Endpoint to get logs for a single process by PID
 app.get("/get-single/:pid", async (req, res) => {
   try {
@@ -42,9 +57,24 @@ app.get("/get-single/:pid", async (req, res) => {
       return res.status(404).json({ message: "Process not found" });
     }
     res.json({
-      PID: process.pid,
-      "Creation time": formatDate(process.creationTime),
+      //   PID: process.pid,
+      //   "Creation time": formatDate(process.creationTime),
       logs: process.logs, //only logs will remaian
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Endpoint to delete a process by PID
+app.delete("/delete-process/:pid", async (req, res) => {
+  try {
+    const result = await Process.findOneAndDelete({ pid: req.params.pid });
+    if (!result) {
+      return res.status(404).json({ message: "Process not found" });
+    }
+    res.json({
+      message: `${req.params.pid} The process has been successfully deleted.`,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
