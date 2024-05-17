@@ -1,28 +1,18 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const Process = require("./models/Process");
-const { format } = require("date-fns");
+const formatDate = require("./utils");
+const connectToDatabase = require("./db");
 
 const app = express();
 app.use(express.json());
 
-mongoose
-  .connect("mongodb://localhost:27017/process-management", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
-
-const formatDate = (date) => {
-  return format(date, "hh.mm a dd.MM.yyyy");
-};
+connectToDatabase();
 
 // Endpoint to create a new process
 app.post("/create-process", async (req, res) => {
   try {
     const newProcess = new Process({
-      pid: Math.floor(Math.random() * 1000), // Generate a random PID
+      pid: Math.floor(Math.random() * 1000),
     });
     await newProcess.save();
     res.status(201).json({
